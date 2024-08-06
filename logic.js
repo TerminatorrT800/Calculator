@@ -3,6 +3,9 @@ const numbersDIV = document.querySelector("#numbers");
 const operationsDIV = document.querySelector("#operations");
 const displayScreen = document.querySelector('#display');
 const zeroEqualDIV = document.createElement("div");
+const deleteBTN = document.querySelector("#delete");
+const clear = document.querySelector('#clear');
+
 
 
 
@@ -13,11 +16,11 @@ const equal = document.createElement("button");
 equal.innerText = "=";
 
 
-const clear = document.createElement("button");
-clear.innerText = "Clear";
+const dot = document.createElement("button");
+dot.innerText = ".";
 
 zeroEqualDIV.setAttribute("id", "zeroEqual");
-zeroEqualDIV.append(zero, equal, clear);
+zeroEqualDIV.append(zero, equal, dot);
 
 const operands = ["+", "-", "*", "/"];
 
@@ -26,6 +29,7 @@ var firstOperand = null;
 var operation = null;
 var secondOperand = null;
 var numberAfterOperation = false;
+var isDot = false;
 
 var opIndex = null;
 
@@ -37,6 +41,7 @@ clear.addEventListener('click', () => {
     displayScreen.innerText = "";
     firstOperand = operation = secondOperand = opIndex = null;
     numberAfterOperation = false;
+    isDot = false;
     console.log(`First: ${firstOperand}\nOperation: ${operation}\nSecond: ${secondOperand}`);
 });
 
@@ -45,25 +50,42 @@ zero.addEventListener("click", () => {
     numberAfterOperation = true;
 });
 
-equal.addEventListener("click", ()=>{
-    if (!displayScreen.innerText == "" && !numberAfterOperation == false && opIndex == null) {
+equal.addEventListener("click", () => {
+    if (!displayScreen.innerText == "" && numberAfterOperation == true && opIndex == null) {
         firstOperand = displayScreen.innerText;
         displayScreen.innerText = firstOperand;
         console.log(`First: ${firstOperand}\nOperation: ${operation}\nSecond: ${secondOperand}`);
-    } else if (!displayScreen.innerText == "" && !numberAfterOperation == false) {
-        numberAfterOperation = false;
+    } else if (!displayScreen.innerText == "" && numberAfterOperation == true) {
+        numberAfterOperation = true;
         secondOperand = displayScreen.innerText.substring(opIndex + 1);
+        opIndex = null;
         displayScreen.innerText = operate(Number(firstOperand), operation, Number(secondOperand));
-        if(!displayScreen.innerText==""){
+        if (!displayScreen.innerText == "") {
             firstOperand = displayScreen.innerText;
+            if (firstOperand.includes(".")) {
+                isDot = true;
+            }
             secondOperand = null;
             operation = null;
             console.log(`First: ${firstOperand}\nOperation: ${operation}\nSecond: ${secondOperand}`);
         }
-        
+
         console.log(`First: ${firstOperand}\nOperation: ${operation}\nSecond: ${secondOperand}`);
     }
-    
+
+});
+
+deleteBTN.addEventListener("click", () => {
+    if (!displayScreen.innerText == "" && numberAfterOperation == true) {
+        displayScreen.innerText += deleteBTN.textContent;
+    }
+});
+
+dot.addEventListener("click", () => {
+    if (!displayScreen.innerText == "" && !displayScreen.innerText.endsWith("+") && !displayScreen.innerText.endsWith("-") && !displayScreen.innerText.endsWith("/") && !displayScreen.innerText.endsWith("*") && isDot == false) {
+        displayScreen.innerText += dot.textContent;
+        isDot = true;
+    }
 });
 
 
@@ -84,7 +106,7 @@ function operate(st, op, nd) {
             alert("Cant do that");
             firstOperand = operation = secondOperand = opIndex = null;
             numberAfterOperation = false;
-            displayScreen.innerText="";
+            displayScreen.innerText = "";
             return "";
 
         } else {
@@ -137,29 +159,36 @@ function createCalc() {
         button.innerText = operands[i];
         operationsDIV.appendChild(button);
         button.addEventListener("click", () => {
-            if (!displayScreen.innerText == "" && !numberAfterOperation == false && opIndex == null) {
+            if (!displayScreen.innerText == "" && numberAfterOperation == true && opIndex == null) {
+                if(displayScreen.innerText.endsWith(".")){
+                    displayScreen.innerText+="0";
+                }
                 numberAfterOperation = false;
                 firstOperand = displayScreen.innerText;
                 operation = button.textContent;
                 displayScreen.innerText += button.textContent;
                 opIndex = operandIndex();
+                isDot = false;
                 console.log(`First: ${firstOperand}\nOperation: ${operation}\nSecond: ${secondOperand}`);
-            } else if (!displayScreen.innerText == "" && !numberAfterOperation == false) {
+            } else if (!displayScreen.innerText == "" && numberAfterOperation == true) {
                 numberAfterOperation = false;
                 secondOperand = displayScreen.innerText.substring(opIndex + 1);
                 displayScreen.innerText = operate(Number(firstOperand), operation, Number(secondOperand));
-                if(!displayScreen.innerText==""){
+                if (!displayScreen.innerText == "") {
                     firstOperand = displayScreen.innerText;
+                    if (!displayScreen.innerText.includes(".")) {
+                        isDot = false;
+                    }
                     secondOperand = null;
                     operation = button.textContent;
                     displayScreen.innerText += button.textContent;
                     opIndex = operandIndex();
+
+
                 }
-                
+
                 console.log(`First: ${firstOperand}\nOperation: ${operation}\nSecond: ${secondOperand}`);
             }
-            operation=button.textContent;
-            displayScreen.innerText = firstOperand + operation;
 
         });
     }
